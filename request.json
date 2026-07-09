@@ -1,0 +1,6 @@
+{
+    "model": "/model_path", 
+    "messages": [{"role": "user", 
+    "content": "Explain Docker."}], 
+    "max_tokens": 100
+}

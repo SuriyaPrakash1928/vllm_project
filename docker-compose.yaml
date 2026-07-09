@@ -1,0 +1,44 @@
+services:
+  vllm-standard:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-standard
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models/standard_model:/model_path
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /model_path
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.7
+
+  vllm-gguf:
+    build:
+      context: ./gguf-server
+      dockerfile: Dockerfile
+    image: my-vllm-gguf:latest
+    container_name: vllm-gguf
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /models/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
+      --tokenizer Qwen/Qwen2.5-0.5B-Instruct
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.7
