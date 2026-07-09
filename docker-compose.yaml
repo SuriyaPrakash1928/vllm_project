@@ -1,0 +1,52 @@
+services:
+  # 1. Standard Model (Runs on port 8000)
+  qwen-vllm-standard:
+    build: .
+    image: qwen-llm-image:latest
+    container_name: qwen_vllm_standard
+    ports:
+      - "8000:8000"
+    volumes:
+      - qwen_models:/models
+    profiles: ["standard"]  # <--- ONLY runs when you explicitly ask for "standard"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /models/Qwen2.5-0.5B-Instruct
+      --served-model-name qwen-standard
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.75
+
+  # 2. GGUF Model (Also runs on port 8000)
+  qwen-vllm-gguf:
+    image: qwen-llm-image:latest
+    container_name: qwen_vllm_gguf
+    ports:
+      - "8000:8000"
+    volumes:
+      - qwen_models:/models
+    profiles: ["gguf"]  # <--- ONLY runs when you explicitly ask for "gguf"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    command: >
+      --model /models/Qwen2.5-0.5B-Instruct-GGUF/Qwen2.5-0.5B-Instruct-Q4_K_M.gguf
+      --tokenizer /models/Qwen2.5-0.5B-Instruct
+      --served-model-name qwen-gguf
+      --host 0.0.0.0
+      --port 8000
+      --gpu-memory-utilization 0.75
+
+volumes:
+  qwen_models:
+    external: true
